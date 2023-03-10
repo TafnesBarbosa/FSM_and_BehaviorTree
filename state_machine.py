@@ -53,53 +53,73 @@ class MoveForwardState(State):
     def __init__(self):
         super().__init__("MoveForward")
         # Todo: add initialization code
+        self.number_calls = 0
 
     def check_transition(self, agent, state_machine):
         # Todo: add logic to check and execute state transition
-        pass
+        if self.number_calls > MOVE_FORWARD_TIME * FREQUENCY:
+            state_machine.change_state(MoveInSpiralState())
+        elif agent.get_bumper_state():
+            state_machine.change_state(GoBackState())
+        
 
     def execute(self, agent):
         # Todo: add execution logic
-        pass
+        self.number_calls += 1
+        agent.set_velocity(FORWARD_SPEED, 0)
 
 
 class MoveInSpiralState(State):
     def __init__(self):
         super().__init__("MoveInSpiral")
         # Todo: add initialization code
+        self.number_calls = 0
+        self.spiral_radius = INITIAL_RADIUS_SPIRAL
     
     def check_transition(self, agent, state_machine):
         # Todo: add logic to check and execute state transition
-        pass
+        if self.number_calls > MOVE_IN_SPIRAL_TIME * FREQUENCY:
+            state_machine.change_state(MoveForwardState())
+        elif agent.get_bumper_state():
+            state_machine.change_state(GoBackState())
 
     def execute(self, agent):
         # Todo: add execution logic
-        pass
+        self.number_calls += 1
+        self.spiral_radius += SAMPLE_TIME * SPIRAL_FACTOR
+        agent.set_velocity(FORWARD_SPEED, FORWARD_SPEED / self.spiral_radius)
 
 
 class GoBackState(State):
     def __init__(self):
         super().__init__("GoBack")
         # Todo: add initialization code
+        self.number_calls = 0
 
     def check_transition(self, agent, state_machine):
         # Todo: add logic to check and execute state transition
-        pass
+        if self.number_calls > GO_BACK_TIME * FREQUENCY:
+            state_machine.change_state(RotateState())
 
     def execute(self, agent):
         # Todo: add execution logic
-        pass
+        self.number_calls += 1
+        agent.set_velocity(BACKWARD_SPEED, 0)
 
 
 class RotateState(State):
     def __init__(self):
         super().__init__("Rotate")
         # Todo: add initialization code
+        self.number_calls = 0
+        self.angle = random.random() * 2 * math.pi - math.pi
 
     def check_transition(self, agent, state_machine):
         # Todo: add logic to check and execute state transition
-        pass
+        if self.number_calls * SAMPLE_TIME * ANGULAR_SPEED > self.angle:
+            state_machine.change_state(MoveForwardState())
     
     def execute(self, agent):
         # Todo: add execution logic
-        pass
+        self.number_calls += 1
+        agent.set_velocity(0, ANGULAR_SPEED)
