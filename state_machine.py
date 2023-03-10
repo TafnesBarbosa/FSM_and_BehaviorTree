@@ -116,10 +116,13 @@ class RotateState(State):
 
     def check_transition(self, agent, state_machine):
         # Todo: add logic to check and execute state transition
-        if self.number_calls * SAMPLE_TIME * ANGULAR_SPEED >= self.angle:
+        if self.number_calls * SAMPLE_TIME * ANGULAR_SPEED >= math.fabs(self.angle):
             state_machine.change_state(MoveForwardState())
     
     def execute(self, agent):
         # Todo: add execution logic
         self.number_calls += 1
-        agent.set_velocity(0, ANGULAR_SPEED)
+        if self.angle >= 0:
+            agent.set_velocity(0, ANGULAR_SPEED)
+        else:
+            agent.set_velocity(0, -ANGULAR_SPEED)
