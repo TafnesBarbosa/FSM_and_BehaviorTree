@@ -57,7 +57,7 @@ class MoveForwardState(State):
 
     def check_transition(self, agent, state_machine):
         # Todo: add logic to check and execute state transition
-        if self.number_calls > MOVE_FORWARD_TIME * FREQUENCY:
+        if self.number_calls >= MOVE_FORWARD_TIME * FREQUENCY:
             state_machine.change_state(MoveInSpiralState())
         elif agent.get_bumper_state():
             state_machine.change_state(GoBackState())
@@ -78,7 +78,7 @@ class MoveInSpiralState(State):
     
     def check_transition(self, agent, state_machine):
         # Todo: add logic to check and execute state transition
-        if self.number_calls > MOVE_IN_SPIRAL_TIME * FREQUENCY:
+        if self.number_calls >= MOVE_IN_SPIRAL_TIME * FREQUENCY:
             state_machine.change_state(MoveForwardState())
         elif agent.get_bumper_state():
             state_machine.change_state(GoBackState())
@@ -98,7 +98,7 @@ class GoBackState(State):
 
     def check_transition(self, agent, state_machine):
         # Todo: add logic to check and execute state transition
-        if self.number_calls > GO_BACK_TIME * FREQUENCY:
+        if self.number_calls >= GO_BACK_TIME * FREQUENCY:
             state_machine.change_state(RotateState())
 
     def execute(self, agent):
@@ -116,7 +116,7 @@ class RotateState(State):
 
     def check_transition(self, agent, state_machine):
         # Todo: add logic to check and execute state transition
-        if self.number_calls * SAMPLE_TIME * ANGULAR_SPEED > self.angle:
+        if self.number_calls * SAMPLE_TIME * ANGULAR_SPEED >= self.angle:
             state_machine.change_state(MoveForwardState())
     
     def execute(self, agent):
