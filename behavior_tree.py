@@ -184,6 +184,13 @@ class RoombaBehaviorTree(BehaviorTree):
     def __init__(self):
         super().__init__()
         # Todo: construct the tree here
+        self.root = SelectorNode('SelectorNode')
+        self.root.add_child(SequenceNode('SequenceNode1'))
+        self.root.children[-1].add_child(MoveForwardNode())
+        self.root.children[-1].add_child(MoveInSpiralNode())
+        self.root.add_child(SequenceNode('SequenceNode2'))
+        self.root.children[-1].add_child(GoBackNode())
+        self.root.children[-1].add_child(RotateNode())
 
 
 class MoveForwardNode(LeafNode):
@@ -193,12 +200,19 @@ class MoveForwardNode(LeafNode):
 
     def enter(self, agent):
         # Todo: add enter logic
-        pass
+        self.number_calls = 0
 
     def execute(self, agent):
         # Todo: add execution logic
-        pass
-
+        if agent.get_bumper_state():
+            return ExecutionStatus.FAILURE
+        elif self.number_calls < MOVE_FORWARD_TIME * FREQUENCY:
+            self.number_calls += 1
+            agent.set_velocity(FORWARD_SPEED, 0)
+            return ExecutionStatus.RUNNING
+        else:
+            return ExecutionStatus.SUCCESS
+        
 
 class MoveInSpiralNode(LeafNode):
     def __init__(self):
@@ -207,11 +221,20 @@ class MoveInSpiralNode(LeafNode):
 
     def enter(self, agent):
         # Todo: add enter logic
-        pass
+        self.number_calls = 0
+        self.spiral_radius = INITIAL_RADIUS_SPIRAL
 
     def execute(self, agent):
         # Todo: add execution logic
-        pass
+        if agent.get_bumper_state():
+            return ExecutionStatus.FAILURE
+        elif self.number_calls < MOVE_IN_SPIRAL_TIME * FREQUENCY:
+            self.number_calls += 1
+            self.spiral_radius += SAMPLE_TIME * SPIRAL_FACTOR
+            agent.set_velocity(FORWARD_SPEED, FORWARD_SPEED / self.spiral_radius)
+            return ExecutionStatus.RUNNING
+        else:
+            return ExecutionStatus.SUCCESS
 
 
 class GoBackNode(LeafNode):
@@ -221,11 +244,16 @@ class GoBackNode(LeafNode):
 
     def enter(self, agent):
         # Todo: add enter logic
-        pass
+        self.number_calls = 0
 
     def execute(self, agent):
         # Todo: add execution logic
-        pass
+        if self.number_calls < GO_BACK_TIME * FREQUENCY:
+            self.number_calls += 1
+            agent.set_velocity(BACKWARD_SPEED, 0)
+            return ExecutionStatus.RUNNING
+        else:
+            return ExecutionStatus.SUCCESS
 
 
 class RotateNode(LeafNode):
@@ -235,9 +263,19 @@ class RotateNode(LeafNode):
 
     def enter(self, agent):
         # Todo: add enter logic
-        pass
+        self.number_calls = 0
+        self.angle = random.random() * 2 * math.pi - math.pi
 
     def execute(self, agent):
         # Todo: add execution logic
-        pass
+        if self.angle >= 0 and self.number_calls * SAMPLE_TIME * ANGULAR_SPEED < self.angle:
+            self.number_calls += 1
+            agent.set_velocity(0, ANGULAR_SPEED)
+            return ExecutionStatus.RUNNING
+        elif self.angle < 0 and self.number_calls * SAMPLE_TIME * ANGULAR_SPEED <= -self.angle:
+            self.number_calls += 1
+            agent.set_velocity(0, -ANGULAR_SPEED)
+            return ExecutionStatus.RUNNING
+        else:
+            return ExecutionStatus.SUCCESS
 
